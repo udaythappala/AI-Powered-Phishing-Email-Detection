@@ -1,6 +1,11 @@
 # Spring Boot
 backend/**/target/
 
+# Eclipse / STS
+backend/.metadata/
+backend/**/.metadata/
+.metadata/
+
 # Python
 ml-service/__pycache__/
 ml-service/*.pyc

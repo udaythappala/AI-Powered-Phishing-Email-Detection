@@ -25,6 +25,7 @@ public class EmailAnalysisController {
         this.service = service;
     }
 
+    // Analyze email
     @PostMapping("/analyze")
     public ResponseEntity<EmailAnalysisResponse> analyzeEmail(
             @Valid @RequestBody EmailAnalysisRequest request) {
@@ -33,6 +34,7 @@ public class EmailAnalysisController {
                 service.analyzeEmail(request));
     }
 
+    // Get analysis history
     @GetMapping("/history")
     public ResponseEntity<List<EmailAnalysis>>
     getHistory() {
@@ -41,6 +43,7 @@ public class EmailAnalysisController {
                 service.getAllAnalyses());
     }
 
+    // Get single analysis
     @GetMapping("/{id}")
     public ResponseEntity<EmailAnalysis>
     getAnalysis(@PathVariable Long id) {
@@ -49,6 +52,7 @@ public class EmailAnalysisController {
                 service.getAnalysisById(id));
     }
 
+    // Delete analysis
     @DeleteMapping("/{id}")
     public ResponseEntity<String>
     deleteAnalysis(@PathVariable Long id) {

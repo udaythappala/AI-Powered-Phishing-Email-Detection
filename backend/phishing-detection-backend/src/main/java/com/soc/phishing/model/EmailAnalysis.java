@@ -29,14 +29,23 @@ public class EmailAnalysis {
 
     private Double phishingScore;
 
+    private String riskLevel;
+
     @Column(columnDefinition = "TEXT")
     private String reasons;
 
     @Column(columnDefinition = "TEXT")
-    private String recommendedAction;
-
-    private String riskLevel;
+    private String urlAnalysis;
 
     @Column(columnDefinition = "TEXT")
-    private String urlAnalysis;
+    private String senderAnalysis;
+
+    @Column(columnDefinition = "TEXT")
+    private String suspiciousIndicators;
+
+    @Column(columnDefinition = "TEXT")
+    private String mitreAttack;
+
+    @Column(columnDefinition = "TEXT")
+    private String recommendedAction;
 }

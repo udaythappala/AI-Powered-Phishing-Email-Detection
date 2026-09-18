@@ -18,8 +18,7 @@ public class MLService {
                         .build();
     }
 
-    public Map<String, Object> predict(
-            String email) {
+    public Map<String, Object> predict(String email) {
 
         Map<String, String> request =
                 Map.of("email", email);

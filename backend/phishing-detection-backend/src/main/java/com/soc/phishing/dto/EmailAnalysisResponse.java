@@ -15,11 +15,17 @@ public class EmailAnalysisResponse {
 
     private Double phishingScore;
 
-    private String reasons;
-
-    private String recommendedAction;
-
     private String riskLevel;
 
+    private String reasons;
+
     private String urlAnalysis;
+
+    private String senderAnalysis;
+
+    private String suspiciousIndicators;
+
+    private String mitreAttack;
+
+    private String recommendedAction;
 }
