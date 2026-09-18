@@ -1,0 +1,5 @@
+package com.soc.phishing.model;
+
+public class EmailAnalysis {
+
+}

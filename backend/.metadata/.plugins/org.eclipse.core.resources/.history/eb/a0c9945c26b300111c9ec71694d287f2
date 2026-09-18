@@ -1,0 +1,110 @@
+package com.soc.phishing.service;
+
+import com.soc.phishing.dto.EmailAnalysisRequest;
+import com.soc.phishing.dto.EmailAnalysisResponse;
+import com.soc.phishing.model.EmailAnalysis;
+import com.soc.phishing.repository.EmailAnalysisRepository;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class EmailAnalysisService {
+
+    private final EmailAnalysisRepository repository;
+
+    public EmailAnalysisService(EmailAnalysisRepository repository) {
+        this.repository = repository;
+    }
+
+    public EmailAnalysisResponse analyzeEmail(EmailAnalysisRequest request) {
+
+        double score = 0;
+        StringBuilder reasons = new StringBuilder();
+
+        String subject = request.getSubject().toLowerCase();
+        String body = request.getEmailBody().toLowerCase();
+
+        if (subject.contains("urgent")) {
+            score += 20;
+            reasons.append("Urgent language detected; ");
+        }
+
+        if (body.contains("click here")) {
+            score += 20;
+            reasons.append("Suspicious click request detected; ");
+        }
+
+        if (body.contains("password")) {
+            score += 15;
+            reasons.append("Password-related request detected; ");
+        }
+
+        if (body.contains("verify your account")) {
+            score += 20;
+            reasons.append("Account verification request detected; ");
+        }
+
+        if (body.contains("payment")) {
+            score += 15;
+            reasons.append("Payment-related request detected; ");
+        }
+
+        if (request.getUrl() != null && !request.getUrl().isBlank()) {
+            score += 10;
+            reasons.append("URL present in email; ");
+        }
+
+        if (score > 100) {
+            score = 100;
+        }
+
+        String prediction;
+        String recommendedAction;
+
+        if (score >= 50) {
+            prediction = "PHISHING";
+            recommendedAction = "Do not click links or provide credentials. Report the email.";
+        } else {
+            prediction = "LEGITIMATE";
+            recommendedAction = "Email appears low risk, but verify the sender before taking action.";
+        }
+
+        if (reasons.length() == 0) {
+            reasons.append("No major suspicious indicators detected.");
+        }
+
+        EmailAnalysis analysis = new EmailAnalysis();
+
+        analysis.setSender(request.getSender());
+        analysis.setSubject(request.getSubject());
+        analysis.setEmailBody(request.getEmailBody());
+        analysis.setUrl(request.getUrl());
+        analysis.setPrediction(prediction);
+        analysis.setPhishingScore(score);
+        analysis.setReasons(reasons.toString());
+        analysis.setRecommendedAction(recommendedAction);
+
+        EmailAnalysis savedAnalysis = repository.save(analysis);
+
+        return new EmailAnalysisResponse(
+                savedAnalysis.getId(),
+                savedAnalysis.getPrediction(),
+                savedAnalysis.getPhishingScore(),
+                savedAnalysis.getReasons(),
+                savedAnalysis.getRecommendedAction()
+        );
+    }
+
+    public java.util.List<EmailAnalysis> getAllAnalyses() {
+        return repository.findAll();
+    }
+
+    public EmailAnalysis getAnalysisById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Analysis not found with id: " + id));
+    }
+
+    public void deleteAnalysis(Long id) {
+        repository.deleteById(id);
+    }
+}

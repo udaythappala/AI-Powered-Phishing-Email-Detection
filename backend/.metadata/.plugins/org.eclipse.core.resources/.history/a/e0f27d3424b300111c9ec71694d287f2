@@ -1,0 +1,5 @@
+package com.soc.phishing.exception;
+
+public class GlobalExceptionHandler {
+
+}

@@ -1,0 +1,19 @@
+# Spring Boot
+backend/**/target/
+
+# Python
+ml-service/__pycache__/
+ml-service/*.pyc
+
+# Environment files
+.env
+*.env
+
+# IDE files
+.vscode/
+.classpath
+.project
+.settings/
+
+# Logs
+*.log

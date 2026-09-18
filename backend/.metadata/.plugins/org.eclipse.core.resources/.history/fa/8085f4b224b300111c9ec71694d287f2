@@ -1,0 +1,52 @@
+package com.soc.phishing.controller;
+
+import com.soc.phishing.dto.EmailAnalysisRequest;
+import com.soc.phishing.dto.EmailAnalysisResponse;
+import com.soc.phishing.model.EmailAnalysis;
+import com.soc.phishing.service.EmailAnalysisService;
+
+import jakarta.validation.Valid;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/emails")
+@CrossOrigin(origins = "http://localhost:5173")
+public class EmailAnalysisController {
+
+    private final EmailAnalysisService service;
+
+    public EmailAnalysisController(EmailAnalysisService service) {
+        this.service = service;
+    }
+
+    @PostMapping("/analyze")
+    public ResponseEntity<EmailAnalysisResponse> analyzeEmail(
+            @Valid @RequestBody EmailAnalysisRequest request) {
+
+        return ResponseEntity.ok(service.analyzeEmail(request));
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<List<EmailAnalysis>> getHistory() {
+
+        return ResponseEntity.ok(service.getAllAnalyses());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<EmailAnalysis> getAnalysis(@PathVariable Long id) {
+
+        return ResponseEntity.ok(service.getAnalysisById(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteAnalysis(@PathVariable Long id) {
+
+        service.deleteAnalysis(id);
+
+        return ResponseEntity.ok("Analysis deleted successfully");
+    }
+}

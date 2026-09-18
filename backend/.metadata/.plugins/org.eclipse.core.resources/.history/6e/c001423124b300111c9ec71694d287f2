@@ -1,0 +1,5 @@
+package com.soc.phishing.config;
+
+public class WebConfig {
+
+}
