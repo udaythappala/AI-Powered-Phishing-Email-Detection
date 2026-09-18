@@ -11,18 +11,16 @@ public class MLService {
     private final RestClient restClient;
 
     public MLService() {
-
-        this.restClient =
-                RestClient.builder()
-                        .baseUrl("http://localhost:5000")
-                        .build();
+        this.restClient = RestClient.builder()
+                .baseUrl("http://localhost:5000")
+                .build();
     }
 
-    public Map<String, Object> predict(
-            String email) {
+    public Map<String, Object> predict(String email) {
 
-        Map<String, String> request =
-                Map.of("email", email);
+        Map<String, String> request = Map.of(
+                "email", email
+        );
 
         return restClient.post()
                 .uri("/predict")

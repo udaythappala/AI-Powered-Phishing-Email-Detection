@@ -18,8 +18,4 @@ public class EmailAnalysisResponse {
     private String reasons;
 
     private String recommendedAction;
-
-    private String riskLevel;
-
-    private String urlAnalysis;
 }

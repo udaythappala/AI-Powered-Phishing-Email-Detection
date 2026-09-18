@@ -25,27 +25,36 @@ public class EmailAnalysisService {
     }
 
     // Analyze email using Python ML service
-    public EmailAnalysisResponse analyzeEmail(EmailAnalysisRequest request) {
+    public EmailAnalysisResponse analyzeEmail(
+            EmailAnalysisRequest request) {
 
-        // Combine subject + body for ML prediction
+        // Combine subject and email body
         String emailText =
-                request.getSubject() + " " + request.getEmailBody();
+                request.getSubject() + " "
+                        + request.getEmailBody();
 
         // Send email to Python ML service
-        Map<String, Object> mlResult = mlService.predict(emailText);
+        Map<String, Object> mlResult =
+                mlService.predict(emailText);
 
         String prediction =
                 (String) mlResult.get("prediction");
 
         Double phishingScore =
-                ((Number) mlResult.get("phishingScore")).doubleValue();
+                ((Number) mlResult.get("phishingScore"))
+                        .doubleValue();
 
-        // Generate explanation
-        String reasons = generateReasons(
-                request,
-                prediction,
-                phishingScore
-        );
+        // Generate reasons
+        String reasons =
+                generateReasons(request);
+
+        // Calculate risk level
+        String riskLevel =
+                calculateRiskLevel(phishingScore);
+
+        // Analyze URL
+        String urlAnalysis =
+                analyzeUrl(request.getUrl());
 
         // Recommended action
         String recommendedAction;
@@ -53,16 +62,19 @@ public class EmailAnalysisService {
         if ("PHISHING".equalsIgnoreCase(prediction)) {
 
             recommendedAction =
-                    "Do not click links or provide credentials. Report the email.";
+                    "Do not click links or provide credentials. "
+                    + "Report the email.";
 
         } else {
 
             recommendedAction =
-                    "Email appears low risk, but verify the sender before taking action.";
+                    "Email appears low risk, but verify the sender "
+                    + "before taking action.";
         }
 
-        // Create database entity
-        EmailAnalysis analysis = new EmailAnalysis();
+        // Create entity
+        EmailAnalysis analysis =
+                new EmailAnalysis();
 
         analysis.setSender(request.getSender());
         analysis.setSubject(request.getSubject());
@@ -72,6 +84,8 @@ public class EmailAnalysisService {
         analysis.setPhishingScore(phishingScore);
         analysis.setReasons(reasons);
         analysis.setRecommendedAction(recommendedAction);
+        analysis.setRiskLevel(riskLevel);
+        analysis.setUrlAnalysis(urlAnalysis);
 
         // Save to PostgreSQL
         EmailAnalysis savedAnalysis =
@@ -83,77 +97,168 @@ public class EmailAnalysisService {
                 savedAnalysis.getPrediction(),
                 savedAnalysis.getPhishingScore(),
                 savedAnalysis.getReasons(),
-                savedAnalysis.getRecommendedAction()
+                savedAnalysis.getRecommendedAction(),
+                savedAnalysis.getRiskLevel(),
+                savedAnalysis.getUrlAnalysis()
         );
     }
 
-    // Generate simple analyst-friendly explanations
+    // Generate suspicious indicators
     private String generateReasons(
-            EmailAnalysisRequest request,
-            String prediction,
-            Double score) {
+            EmailAnalysisRequest request) {
 
-        StringBuilder reasons = new StringBuilder();
+        StringBuilder reasons =
+                new StringBuilder();
 
-        String subject = request.getSubject().toLowerCase();
-        String body = request.getEmailBody().toLowerCase();
+        String subject =
+                request.getSubject().toLowerCase();
+
+        String body =
+                request.getEmailBody().toLowerCase();
 
         if (subject.contains("urgent")) {
-            reasons.append("Urgent language detected; ");
+
+            reasons.append(
+                    "Urgent language detected; ");
         }
 
         if (body.contains("click here")) {
-            reasons.append("Suspicious click request detected; ");
+
+            reasons.append(
+                    "Suspicious click request detected; ");
         }
 
         if (body.contains("password")) {
-            reasons.append("Password-related request detected; ");
+
+            reasons.append(
+                    "Password-related request detected; ");
         }
 
         if (body.contains("verify your account")) {
-            reasons.append("Account verification request detected; ");
+
+            reasons.append(
+                    "Account verification request detected; ");
         }
 
         if (body.contains("payment")) {
-            reasons.append("Payment-related request detected; ");
+
+            reasons.append(
+                    "Payment-related request detected; ");
         }
 
-        if (request.getUrl() != null &&
-                !request.getUrl().isBlank()) {
+        if (body.contains("bank")) {
 
-            reasons.append("URL present in email; ");
+            reasons.append(
+                    "Banking-related content detected; ");
+        }
+
+        if (request.getUrl() != null
+                && !request.getUrl().isBlank()) {
+
+            reasons.append(
+                    "URL present in email; ");
         }
 
         if (reasons.length() == 0) {
 
-            if ("PHISHING".equalsIgnoreCase(prediction)) {
-                reasons.append(
-                        "ML model identified suspicious email patterns."
-                );
-            } else {
-                reasons.append(
-                        "No major suspicious indicators detected."
-                );
-            }
+            reasons.append(
+                    "No major suspicious indicators detected.");
         }
 
         return reasons.toString();
     }
 
-    // Get all analyzed emails
+    // Calculate risk level
+    private String calculateRiskLevel(
+            Double phishingScore) {
+
+        if (phishingScore >= 70) {
+
+            return "HIGH";
+
+        } else if (phishingScore >= 40) {
+
+            return "MEDIUM";
+
+        } else {
+
+            return "LOW";
+        }
+    }
+
+    // Analyze suspicious URL indicators
+    private String analyzeUrl(String url) {
+
+        if (url == null || url.isBlank()) {
+
+            return "No URL provided";
+        }
+
+        String lowerUrl =
+                url.toLowerCase();
+
+        StringBuilder analysis =
+                new StringBuilder();
+
+        if (lowerUrl.startsWith("http://")) {
+
+            analysis.append(
+                    "URL uses HTTP instead of HTTPS; ");
+        }
+
+        if (lowerUrl.contains("@")) {
+
+            analysis.append(
+                    "URL contains @ symbol; ");
+        }
+
+        if (lowerUrl.contains("login")) {
+
+            analysis.append(
+                    "URL contains login keyword; ");
+        }
+
+        if (lowerUrl.contains("verify")) {
+
+            analysis.append(
+                    "URL contains verify keyword; ");
+        }
+
+        if (lowerUrl.contains("account")) {
+
+            analysis.append(
+                    "URL contains account keyword; ");
+        }
+
+        if (lowerUrl.contains("password")) {
+
+            analysis.append(
+                    "URL contains password keyword; ");
+        }
+
+        if (analysis.length() == 0) {
+
+            return "No obvious URL indicators detected";
+        }
+
+        return analysis.toString();
+    }
+
+    // Get all analyses
     public List<EmailAnalysis> getAllAnalyses() {
 
         return repository.findAll();
     }
 
     // Get analysis by ID
-    public EmailAnalysis getAnalysisById(Long id) {
+    public EmailAnalysis getAnalysisById(
+            Long id) {
 
         return repository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException(
-                                "Analysis not found with id: " + id
-                        ));
+                                "Analysis not found with id: "
+                                        + id));
     }
 
     // Delete analysis

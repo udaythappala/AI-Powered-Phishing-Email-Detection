@@ -34,9 +34,4 @@ public class EmailAnalysis {
 
     @Column(columnDefinition = "TEXT")
     private String recommendedAction;
-
-    private String riskLevel;
-
-    @Column(columnDefinition = "TEXT")
-    private String urlAnalysis;
 }

@@ -19,9 +19,7 @@ public class EmailAnalysisController {
 
     private final EmailAnalysisService service;
 
-    public EmailAnalysisController(
-            EmailAnalysisService service) {
-
+    public EmailAnalysisController(EmailAnalysisService service) {
         this.service = service;
     }
 
@@ -29,33 +27,26 @@ public class EmailAnalysisController {
     public ResponseEntity<EmailAnalysisResponse> analyzeEmail(
             @Valid @RequestBody EmailAnalysisRequest request) {
 
-        return ResponseEntity.ok(
-                service.analyzeEmail(request));
+        return ResponseEntity.ok(service.analyzeEmail(request));
     }
 
     @GetMapping("/history")
-    public ResponseEntity<List<EmailAnalysis>>
-    getHistory() {
+    public ResponseEntity<List<EmailAnalysis>> getHistory() {
 
-        return ResponseEntity.ok(
-                service.getAllAnalyses());
+        return ResponseEntity.ok(service.getAllAnalyses());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EmailAnalysis>
-    getAnalysis(@PathVariable Long id) {
+    public ResponseEntity<EmailAnalysis> getAnalysis(@PathVariable Long id) {
 
-        return ResponseEntity.ok(
-                service.getAnalysisById(id));
+        return ResponseEntity.ok(service.getAnalysisById(id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String>
-    deleteAnalysis(@PathVariable Long id) {
+    public ResponseEntity<String> deleteAnalysis(@PathVariable Long id) {
 
         service.deleteAnalysis(id);
 
-        return ResponseEntity.ok(
-                "Analysis deleted successfully");
+        return ResponseEntity.ok("Analysis deleted successfully");
     }
 }
